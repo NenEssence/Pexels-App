@@ -1,4 +1,4 @@
-package com.example.pexelsapp.fragments
+package com.example.pexelsapp.presentation.fragments
 
 import android.os.Bundle
 import android.view.LayoutInflater
