@@ -1,17 +1,28 @@
 package com.example.pexelsapp.presentation.viewModel
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import android.util.Log
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.pexelsapp.data.local.PhotoDbEntity
+import com.example.pexelsapp.data.remote.model.PexelsApiEntity
 import com.example.pexelsapp.domain.PhotoRepository
 import kotlinx.coroutines.launch
+import retrofit2.Response
 
-class PhotoViewModel(app: Application, private val photoRepository: PhotoRepository) :
-    AndroidViewModel(app) {
+class PhotoViewModel(private val repository: PhotoRepository) :
+    ViewModel() {
 
-    fun addPhoto(photo: PhotoDbEntity) {
+    var photolist: MutableLiveData<Response<PexelsApiEntity>> = MutableLiveData()
+
+    init {
+        getPhoto("nature")
+    }
+
+    fun getPhoto(s: String) {
         viewModelScope.launch {
+            val response = repository.loadPhoto(s)
+            Log.d("RESPONSE", "$response")
+            photolist.postValue(response)
         }
     }
 }

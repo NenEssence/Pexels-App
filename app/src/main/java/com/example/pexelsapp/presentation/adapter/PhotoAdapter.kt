@@ -1,15 +1,18 @@
 package com.example.pexelsapp.presentation.adapter
 
-import android.provider.ContactsContract.Contacts.Photo
+
+import android.content.res.Resources
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.example.pexelsapp.data.remote.model.Photo
 import com.example.pexelsapp.databinding.PhotoLayoutBinding
-import com.example.pexelsapp.presentation.fragments.HomeFragmentDirections
+
 
 class PhotoAdapter : RecyclerView.Adapter<PhotoViewHolder>() {
-    private val list = emptyList<Photo>()
+    var list = ArrayList<Photo>()
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PhotoViewHolder {
@@ -19,11 +22,15 @@ class PhotoAdapter : RecyclerView.Adapter<PhotoViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: PhotoViewHolder, position: Int) {
-        val currentPhoto = list[position]
-        holder.itemView.setOnClickListener{
-            //TODO change direction
-            val direction = HomeFragmentDirections.actionHomeFragmentToBookmarkFragment()
-            it.findNavController().navigate(direction)
+        holder.itemView.layoutParams.height = list[position].height - list[position].width - Resources.getSystem().displayMetrics.widthPixels / 2
+        Glide.with(holder.itemView.context).load(list[position].src.portrait)
+            .centerCrop()
+            .into(holder.image)
+
+
+        Log.d("PEXELS_RESPONSE", list[position].toString())
+        holder.itemView.setOnClickListener {
+            Log.d("-->", "Click")
         }
     }
 

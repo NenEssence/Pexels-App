@@ -39,10 +39,10 @@ android {
     buildFeatures {
         viewBinding = true
     }
+
 }
 
 dependencies {
-
     // ROOM
     val roomVersion = "2.6.1"
     implementation ("androidx.room:room-runtime:$roomVersion")
@@ -65,6 +65,12 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion")
     // Annotation processor
     ksp("androidx.lifecycle:lifecycle-compiler:$lifecycleVersion")
+    //Retrofit
+    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+    //Glide
+    implementation("com.github.bumptech.glide:glide:4.14.2")
+    ksp("com.github.bumptech.glide:ksp:4.14.2")
 
 
     implementation("androidx.core:core-ktx:1.9.0")

@@ -4,13 +4,13 @@
     <item
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:title="Home"
+        android:title=""
         android:id="@+id/home"
-        android:icon="@drawable/home_button_inactive"/>
+        android:icon="@drawable/home_inactive_icon"/>
     <item
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:title="Bookmarks"
+        android:title=""
         android:id="@+id/bookmarks"
-        android:icon="@drawable/bookmark_button_inactive"/>
+        android:icon="@drawable/bookmark_inactive_icon"/>
 </menu>
