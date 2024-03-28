@@ -11,7 +11,7 @@ interface PexelsApi {
     @Headers("Authorization: S3aEK0YKhQmibMS9O8oK9W79a38P11Y0MbQKjhyXtZTCzJ1AnMXWBIlz")
     @GET("search")
     suspend fun getPhoto(
-        @Query("query") query: String = "nature",
+        @Query("query") query: String = "human",
         @Query("rer_page") perpage: Int = 30
     ): Response<PexelsApiEntity>
 }

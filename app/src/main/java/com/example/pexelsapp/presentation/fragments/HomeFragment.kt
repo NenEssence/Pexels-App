@@ -36,6 +36,7 @@ class HomeFragment : Fragment() {
 
 //        binding.homeRecyclerView.layoutManager = GridLayoutManager(this.context,2)
         val adapter = PhotoAdapter()
+
         binding.homeRecyclerView.adapter = adapter
 
         val staggeredLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
@@ -49,7 +50,7 @@ class HomeFragment : Fragment() {
         binding.homeRecyclerView.setHasFixedSize(true)
 
 
-
+        adapter.differ.submitList(viewModel.photolist)
         viewModel.photolist.observe(this, Observer {
             try {
                 adapter.list = it.body()?.photos as ArrayList<Photo>
