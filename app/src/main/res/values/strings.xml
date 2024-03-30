@@ -3,4 +3,6 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="bookmark_text">BOOKMARK</string>
     <string name="home_text">HOME</string>
+    <string name="description">search button</string>
+    <string name="editText_default">Search</string>
 </resources>

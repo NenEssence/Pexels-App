@@ -1,6 +1,6 @@
 package com.example.pexelsapp.data.remote.model
 
-data class PexelsApiEntity(
+data class PexelsApiResponse(
     val next_page: String,
     val page: Int,
     val per_page: Int,

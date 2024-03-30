@@ -1,6 +1,7 @@
 package com.example.pexelsapp.presentation
 
 import android.os.Bundle
+import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
@@ -11,11 +12,13 @@ import com.example.pexelsapp.data.PhotoRepositoryImpl
 import com.example.pexelsapp.data.local.PhotoDatabase
 import com.example.pexelsapp.data.remote.RetrofitInstance
 import com.example.pexelsapp.databinding.ActivityMainBinding
+import com.example.pexelsapp.presentation.viewModel.PhotoViewModel
 import com.example.pexelsapp.presentation.viewModel.PhotoViewModelFactory
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
+    lateinit var viewModel: PhotoViewModel
 
 
 
@@ -23,9 +26,13 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
+        this.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING)
         navController = (binding.navHostFragment.getFragment<NavHostFragment>())
             .findNavController()
+
+        val repository = PhotoRepositoryImpl(RetrofitInstance.api)
+        val viewModelFactory = PhotoViewModelFactory(repository)
+        viewModel = ViewModelProvider(this, viewModelFactory)[PhotoViewModel::class.java]
 
         //TODO Переделать
         binding.bottomNavigationView.setOnItemSelectedListener {
