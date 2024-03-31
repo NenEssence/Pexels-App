@@ -4,21 +4,26 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.pexelsapp.data.remote.model.FeaturedCollection
-import com.example.pexelsapp.databinding.PhotoLayoutBinding
+import com.example.pexelsapp.databinding.FeaturedCollectionLayoutBinding
 
-class CollectionsAdapter: RecyclerView.Adapter<CollectionsViewHolder>() {
+class CollectionsAdapter : RecyclerView.Adapter<CollectionsViewHolder>() {
     var list = emptyList<FeaturedCollection>()
+    lateinit var onClick: (CollectionsViewHolder) -> Unit
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CollectionsViewHolder {
         return CollectionsViewHolder(
-            PhotoLayoutBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            FeaturedCollectionLayoutBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false
+            )
         )
     }
 
-    override fun getItemCount(): Int {
-        TODO("Not yet implemented")
-    }
+    override fun getItemCount(): Int = list.size
 
     override fun onBindViewHolder(holder: CollectionsViewHolder, position: Int) {
-        TODO("Not yet implemented")
+        val current = list[position]
+        holder.title.text = current.title
+        holder.itemView.setOnClickListener{onClick(holder)}
     }
 }

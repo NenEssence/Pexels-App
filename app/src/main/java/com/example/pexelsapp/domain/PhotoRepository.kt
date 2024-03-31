@@ -1,5 +1,6 @@
 package com.example.pexelsapp.domain
 
+import com.example.pexelsapp.data.remote.model.CollectionsResponse
 import com.example.pexelsapp.data.remote.model.PexelsApiResponse
 import retrofit2.Response
 
@@ -10,4 +11,5 @@ interface PhotoRepository {
 
     suspend fun loadPhoto(query: String): Response<PexelsApiResponse>
     suspend fun loadMorePhoto(page: Int, query: String): Response<PexelsApiResponse>
+    suspend fun getFeaturedCollections(): Response<CollectionsResponse>
 }

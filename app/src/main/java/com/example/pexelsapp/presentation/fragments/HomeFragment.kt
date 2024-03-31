@@ -1,17 +1,23 @@
 package com.example.pexelsapp.presentation.fragments
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
+import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.example.pexelsapp.R
 import com.example.pexelsapp.databinding.FragmentHomeBinding
 import com.example.pexelsapp.presentation.MainActivity
 import com.example.pexelsapp.presentation.adapter.photo.PhotosAdapter
+import com.example.pexelsapp.presentation.adapter.tag.CollectionsAdapter
 import com.example.pexelsapp.presentation.viewModel.PaginationScrollListener
 import com.example.pexelsapp.presentation.viewModel.PhotoViewModel
 
@@ -36,34 +42,60 @@ class HomeFragment : Fragment() {
 
         val staggeredLayoutManager =
             StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+        val linearLayoutManager =
+            LinearLayoutManager(this.context, LinearLayoutManager.HORIZONTAL, false)
 
-        val adapter = PhotosAdapter()
+        val photosAdapter = PhotosAdapter()
+        val collectionsAdapter = CollectionsAdapter()
 
-        binding.photoRecyclerView.adapter = adapter
+
+        binding.photoRecyclerView.adapter = photosAdapter
         binding.photoRecyclerView.layoutManager = staggeredLayoutManager
         binding.photoRecyclerView.setHasFixedSize(true)
 
-        setObservers(adapter,staggeredLayoutManager)
+        binding.collectionsRecyclerView.adapter = collectionsAdapter
+        binding.collectionsRecyclerView.layoutManager = linearLayoutManager
+        setObservers(photosAdapter, collectionsAdapter, staggeredLayoutManager)
     }
 
     private fun setObservers(
-        adapter: PhotosAdapter,
+        photosAdapter: PhotosAdapter,
+        collectionsAdapter: CollectionsAdapter,
         staggeredLayoutManager: StaggeredGridLayoutManager
     ) {
 
-        viewModel.photolist.observe(this, Observer {
+        viewModel.photoList.observe(this, Observer {
             try {
                 if (it != null) {
-                    adapter.list = it
-                    Log.d("ELEMENT", "${adapter.itemCount}")
-                    adapter.notifyDataSetChanged()
+                    photosAdapter.list = it
+                    Log.d("ELEMENT", "${photosAdapter.itemCount}")
+                    photosAdapter.notifyDataSetChanged()
                 }
             } catch (_: Exception) {
             }
         })
-        viewModel.viewState.observe(this,Observer<PhotoViewModel.ViewState>{
-            it?.let { render(it) }
+
+        viewModel.collectionList.observe(this, Observer {
+            try {
+                if (it != null) {
+                    collectionsAdapter.list = it
+                    collectionsAdapter.notifyDataSetChanged()
+                }
+            } catch (_: Exception) {
+            }
         })
+
+        collectionsAdapter.onClick = {
+            viewModel.getPhoto(it.title.text.toString())
+            binding.editText.setText(it.title.text.toString())
+
+        }
+
+        viewModel.viewState.observe(this, Observer<PhotoViewModel.ViewState> {
+            Log.d("PODPISKA","asd")
+            render(it)
+        })
+
         binding.editText.setOnKeyListener(View.OnKeyListener { _, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
                 viewModel.getPhoto(binding.editText.text.toString())
@@ -78,17 +110,25 @@ class HomeFragment : Fragment() {
                 viewModel.loadMorePhoto()
                 Log.d("listener", "OnScroll")
             }
+
             override val isLastPage: Boolean
                 get() = viewModel.currentViewState().isLastPage
             override val isLoading: Boolean
                 get() = viewModel.currentViewState().isLoading
         })
     }
-    private fun render(viewState: PhotoViewModel.ViewState){
-        when (viewState.isLoading){
+
+    private fun render(viewState: PhotoViewModel.ViewState) {
+        when (viewState.isLoading) {
             true -> binding.progressBar.visibility = View.VISIBLE
             false -> binding.progressBar.visibility = View.GONE
         }
-        binding.progressBar.setProgressCompat(viewState.progress,true)
+        if (viewState.selectedCollection != null) {
+//            val vm = binding.collectionsRecyclerView.layoutManager?.findViewByPosition(viewState.selectedCollection)
+//            vm?.findViewById<CardView>(R.id.card)?.setCardBackgroundColor(R.color.red)
+//            binding.collectionsRecyclerView.layoutManager?.findViewByPosition(viewState.selectedCollection)
+//                ?.setBackgroundColor(R.color.red)
+        }
+        binding.progressBar.setProgressCompat(viewState.progress, true)
     }
 }
