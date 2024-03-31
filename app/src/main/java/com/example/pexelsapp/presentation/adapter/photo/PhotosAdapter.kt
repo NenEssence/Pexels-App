@@ -47,9 +47,6 @@ class PhotosAdapter : RecyclerView.Adapter<PhotosViewHolder>() {
             .centerCrop()
             .into(holder.image)
         holder.setIsRecyclable(false)
-        holder.itemView.setOnClickListener {
-            Log.d("-->", "Click")
-        }
     }
 
 //    override fun getItemCount() = differ.currentList.size

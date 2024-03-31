@@ -1,6 +1,5 @@
 package com.example.pexelsapp.presentation.viewModel
 
-import android.util.Log
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 
@@ -29,6 +28,6 @@ abstract class PaginationScrollListener(private val layoutManager: StaggeredGrid
     }
 
     protected abstract fun loadMoreItems()
-    abstract val  isLastPage: Boolean
-    abstract val  isLoading: Boolean
+    abstract val isLastPage: Boolean
+    abstract val isLoading: Boolean
 }

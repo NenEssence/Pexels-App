@@ -16,4 +16,5 @@ class PhotoRepositoryImpl( private val api: PexelsApi) :
 
     override suspend fun loadPhoto(query: String) = api.getPhoto(query)
     override suspend fun loadMorePhoto(page: Int,query: String) = api.loadMorePhoto(page,query)
+    override suspend fun getFeaturedCollections() = api.getFeaturedCollections()
 }
