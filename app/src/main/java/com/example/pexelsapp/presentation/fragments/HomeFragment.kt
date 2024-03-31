@@ -1,19 +1,16 @@
 package com.example.pexelsapp.presentation.fragments
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
-import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.example.pexelsapp.R
 import com.example.pexelsapp.databinding.FragmentHomeBinding
 import com.example.pexelsapp.presentation.MainActivity
 import com.example.pexelsapp.presentation.adapter.photo.PhotosAdapter
@@ -88,11 +85,14 @@ class HomeFragment : Fragment() {
         collectionsAdapter.onClick = {
             viewModel.getPhoto(it.title.text.toString())
             binding.editText.setText(it.title.text.toString())
-
+        }
+        photosAdapter.onClick = {
+            viewModel.setDetailsState(it)
+            val action = HomeFragmentDirections.actionHomeFragmentToDetailsFragment()
+            binding.root.findNavController().navigate(action)
         }
 
         viewModel.viewState.observe(this, Observer<PhotoViewModel.ViewState> {
-            Log.d("PODPISKA","asd")
             render(it)
         })
 

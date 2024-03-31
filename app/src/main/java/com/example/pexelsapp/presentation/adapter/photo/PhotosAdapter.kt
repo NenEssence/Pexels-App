@@ -13,10 +13,12 @@ import com.bumptech.glide.request.RequestOptions
 import com.example.pexelsapp.R
 import com.example.pexelsapp.data.remote.model.Photo
 import com.example.pexelsapp.databinding.PhotoLayoutBinding
+import com.example.pexelsapp.presentation.adapter.tag.CollectionsViewHolder
 
 
 class PhotosAdapter : RecyclerView.Adapter<PhotosViewHolder>() {
     var list = emptyList<Photo>()
+    lateinit var onClick: (Photo) -> Unit
 
     private val differCallback = object : DiffUtil.ItemCallback<Photo>() {
         override fun areItemsTheSame(oldItem: Photo, newItem: Photo): Boolean {
@@ -47,6 +49,7 @@ class PhotosAdapter : RecyclerView.Adapter<PhotosViewHolder>() {
             .centerCrop()
             .into(holder.image)
         holder.setIsRecyclable(false)
+        holder.itemView.setOnClickListener{onClick(list[position])}
     }
 
 //    override fun getItemCount() = differ.currentList.size
