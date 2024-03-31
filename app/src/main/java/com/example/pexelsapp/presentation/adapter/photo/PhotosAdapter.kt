@@ -1,4 +1,4 @@
-package com.example.pexelsapp.presentation.adapter
+package com.example.pexelsapp.presentation.adapter.photo
 
 
 import android.content.res.Resources
@@ -15,7 +15,7 @@ import com.example.pexelsapp.data.remote.model.Photo
 import com.example.pexelsapp.databinding.PhotoLayoutBinding
 
 
-class PhotoAdapter : RecyclerView.Adapter<PhotoViewHolder>() {
+class PhotosAdapter : RecyclerView.Adapter<PhotosViewHolder>() {
     var list = emptyList<Photo>()
 
     private val differCallback = object : DiffUtil.ItemCallback<Photo>() {
@@ -29,17 +29,19 @@ class PhotoAdapter : RecyclerView.Adapter<PhotoViewHolder>() {
     }
     val differ = AsyncListDiffer(this, differCallback)
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PhotoViewHolder {
-        return PhotoViewHolder(
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PhotosViewHolder {
+        return PhotosViewHolder(
             PhotoLayoutBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     }
 
-    override fun onBindViewHolder(holder: PhotoViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: PhotosViewHolder, position: Int) {
 
         val req = RequestOptions().placeholder(R.drawable.ic_launcher_background)
+        //calculate new size
         holder.itemView.layoutParams.height =
             list[position].height - list[position].width - Resources.getSystem().displayMetrics.widthPixels / 2
+
         Glide.with(holder.itemView.context).load(list[position].src.portrait)
             .apply(req)
             .centerCrop()

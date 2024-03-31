@@ -8,18 +8,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.example.pexelsapp.data.PhotoRepositoryImpl
-import com.example.pexelsapp.data.remote.RetrofitInstance
-import com.example.pexelsapp.data.remote.model.Photo
 import com.example.pexelsapp.databinding.FragmentHomeBinding
 import com.example.pexelsapp.presentation.MainActivity
-import com.example.pexelsapp.presentation.adapter.PhotoAdapter
+import com.example.pexelsapp.presentation.adapter.photo.PhotosAdapter
 import com.example.pexelsapp.presentation.viewModel.PaginationScrollListener
 import com.example.pexelsapp.presentation.viewModel.PhotoViewModel
-import com.example.pexelsapp.presentation.viewModel.PhotoViewModelFactory
 
 
 class HomeFragment : Fragment() {
@@ -43,23 +37,33 @@ class HomeFragment : Fragment() {
         val staggeredLayoutManager =
             StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
 
-        val adapter = PhotoAdapter()
+        val adapter = PhotosAdapter()
 
+        binding.photoRecyclerView.adapter = adapter
+        binding.photoRecyclerView.layoutManager = staggeredLayoutManager
+        binding.photoRecyclerView.setHasFixedSize(true)
 
-        binding.homeRecyclerView.adapter = adapter
-        binding.homeRecyclerView.layoutManager = staggeredLayoutManager
-        binding.homeRecyclerView.setHasFixedSize(true)
+        setObservers(adapter,staggeredLayoutManager)
+    }
 
-        binding.homeRecyclerView.addOnScrollListener(object : PaginationScrollListener(staggeredLayoutManager){
-            override fun loadMoreItems() {
-                Log.d("SCROLL","Triggered")
+    private fun setObservers(
+        adapter: PhotosAdapter,
+        staggeredLayoutManager: StaggeredGridLayoutManager
+    ) {
+
+        viewModel.photolist.observe(this, Observer {
+            try {
+                if (it != null) {
+                    adapter.list = it
+                    Log.d("ELEMENT", "${adapter.itemCount}")
+                    adapter.notifyDataSetChanged()
+                }
+            } catch (_: Exception) {
             }
-            override val isLastPage: Boolean
-                get() = false
-            override val isLoading: Boolean
-                get() = false
         })
-
+        viewModel.viewState.observe(this,Observer<PhotoViewModel.ViewState>{
+            it?.let { render(it) }
+        })
         binding.editText.setOnKeyListener(View.OnKeyListener { _, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
                 viewModel.getPhoto(binding.editText.text.toString())
@@ -68,17 +72,23 @@ class HomeFragment : Fragment() {
             false
         })
 
-        viewModel.photolist.observe(this, Observer {
-            try {
-                if (it != null) {
-                    adapter.list = it.body()?.photos as ArrayList<Photo>
-                    Log.d("ELEMENT","${adapter.itemCount}")
-                    adapter.notifyDataSetChanged()
-                }
-//                adapter.differ.submitList(it?.body()?.photos?.toMutableList())
-            } catch (_: Exception) {
-
+        binding.photoRecyclerView.addOnScrollListener(object :
+            PaginationScrollListener(staggeredLayoutManager) {
+            override fun loadMoreItems() {
+                viewModel.loadMorePhoto()
+                Log.d("listener", "OnScroll")
             }
+            override val isLastPage: Boolean
+                get() = viewModel.currentViewState().isLastPage
+            override val isLoading: Boolean
+                get() = viewModel.currentViewState().isLoading
         })
+    }
+    private fun render(viewState: PhotoViewModel.ViewState){
+        when (viewState.isLoading){
+            true -> binding.progressBar.visibility = View.VISIBLE
+            false -> binding.progressBar.visibility = View.GONE
+        }
+        binding.progressBar.setProgressCompat(viewState.progress,true)
     }
 }
