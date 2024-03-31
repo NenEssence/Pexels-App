@@ -9,4 +9,5 @@ interface PhotoRepository {
 //    fun getAllPhotos() : LiveData<List<PhotoDbEntity>>
 
     suspend fun loadPhoto(query: String): Response<PexelsApiResponse>
+    suspend fun loadMorePhoto(page: Int, query: String): Response<PexelsApiResponse>
 }
