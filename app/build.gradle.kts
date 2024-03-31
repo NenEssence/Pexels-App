@@ -72,7 +72,8 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:4.16.0")
     //Materials
     implementation ("com.google.android.material:material:1.11.0")
-
+    //Splash Screen
+    implementation ("androidx.core:core-splashscreen:1.0.1")
 
 
     implementation("androidx.core:core-ktx:1.9.0")
