@@ -28,7 +28,6 @@ import javax.inject.Inject
 @HiltViewModel
 class PhotoViewModel @Inject constructor(private val repository: PhotoRepository) : ViewModel() {
 
-
     var photoList: MutableLiveData<List<Photo>> = MutableLiveData()
     var collectionkList: MutableLiveData<List<FeaturedCollection>> = MutableLiveData()
     var detailsPhoto: MutableLiveData<Photo> = MutableLiveData()
@@ -44,47 +43,45 @@ class PhotoViewModel @Inject constructor(private val repository: PhotoRepository
         getPhoto(currentQuery)
     }
 
-    fun getCuratedPhoto() {
-        viewModelScope.launch {
-            page = 1
-            val response = repository.loadCuratedPhoto(page)
-            photoList.postValue(response.body()?.photos)
-        }
-    }
-
     fun getPhoto(newQuery: String) {
-        Log.d("GETPHOTO",newQuery)
         when (newQuery) {
             "" -> {
-                viewState.value = currentViewState().copy(currentQuery = newQuery)
+                viewState.postValue(currentViewState().copy(currentQuery = newQuery))
                 viewModelScope.launch {
-                page = 1
-                val response = repository.loadCuratedPhoto(page)
-                photoList.postValue(response.body()?.photos)}
+                    page = 1
+                    val response = repository.loadCuratedPhoto(page)
+                    photoList.postValue(response.body()?.photos)
+                }
             }
 
             else -> {
                 checkCollection(newQuery)
                 currentQuery = newQuery
-                viewState.value = currentViewState().copy(currentQuery = newQuery)
+                viewState.postValue(currentViewState().copy(currentQuery = newQuery))
                 viewModelScope.launch {
                     page = 1
                     val response = repository.loadPhoto(page, newQuery)
+                    Log.d("-->",response.body()?.total_results.toString())
+                    if (response.body()?.total_results == 0) {
+                        viewState.postValue(currentViewState().copy(noResaultsFound = true))
+                    } else {
+                        viewState.postValue(currentViewState().copy(noResaultsFound = false))
+                    }
                     photoList.postValue(response.body()?.photos)
                 }
             }
         }
     }
 
+
     fun loadMorePhoto() {
         viewState.value = currentViewState().copy(isLoading = true)
-        Log.d("loadMorePhoto",viewState.value!!.currentQuery)
         when (viewState.value!!.currentQuery) {
             "" -> viewModelScope.launch {
                 page++
                 val response = repository.loadCuratedPhoto(page)
                 photoList.value = photoList.value?.plus(response.body()?.photos as List<Photo>)
-                viewState.value = currentViewState().copy(isLoading = false)
+                viewState.postValue(currentViewState().copy(isLoading = false))
             }
 
             else ->
@@ -92,23 +89,27 @@ class PhotoViewModel @Inject constructor(private val repository: PhotoRepository
                     page++
                     val response = repository.loadPhoto(page, currentQuery)
                     photoList.value = photoList.value?.plus(response.body()?.photos as List<Photo>)
-                    viewState.value = currentViewState().copy(isLoading = false)
+                    viewState.postValue(currentViewState().copy(isLoading = false))
                 }
 
         }
     }
 
     private fun checkCollection(newQuery: String) {
-        viewState.value = currentViewState().copy(currentQuery = newQuery)
+        viewState.postValue(currentViewState().copy(currentQuery = newQuery))
         //Search in loaded Featured Collections
         val findCollection = collectionkList.value?.find { it.title == newQuery }
         if (findCollection != null) {
-            viewState.value = currentViewState().copy(
-                selectedCollection = collectionkList.value!!.indexOf(findCollection)
+            viewState.postValue(
+                currentViewState().copy(
+                    selectedCollection = collectionkList.value!!.indexOf(findCollection)
+                )
             )
         } else {
-            viewState.value = currentViewState().copy(
-                selectedCollection = null
+            viewState.postValue(
+                currentViewState().copy(
+                    selectedCollection = null
+                )
             )
         }
     }
@@ -147,8 +148,8 @@ class PhotoViewModel @Inject constructor(private val repository: PhotoRepository
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fileOutPutStream)
             fileOutPutStream.flush()
             fileOutPutStream.close()
-            viewState.value = currentViewState().copy(isToastDownload = true)
-            viewState.value = currentViewState().copy(isToastDownload = false)
+            viewState.postValue(currentViewState().copy(isToastDownload = true))
+            viewState.postValue(currentViewState().copy(isToastDownload = false))
         } catch (e: FileNotFoundException) {
             e.printStackTrace()
         } catch (e: IOException) {
@@ -165,7 +166,7 @@ class PhotoViewModel @Inject constructor(private val repository: PhotoRepository
         viewModelScope.launch {
             if (repository.findPhotoById(photo.id) != null) {
                 repository.deletePhoto(photo.id)
-                viewState.value = currentViewState().copy(isBookmarked = false)
+                viewState.postValue(currentViewState().copy(isBookmarked = false))
             } else {
                 repository.insertPhoto(
                     PhotoDbEntity(
@@ -179,7 +180,7 @@ class PhotoViewModel @Inject constructor(private val repository: PhotoRepository
                         photo.width
                     )
                 )
-                viewState.value = currentViewState().copy(isBookmarked = true)
+                viewState.postValue(currentViewState().copy(isBookmarked = true))
             }
         }
     }
@@ -187,15 +188,12 @@ class PhotoViewModel @Inject constructor(private val repository: PhotoRepository
     fun checkBookmarked() {
         viewModelScope.launch {
             if (repository.findPhotoById(detailsPhoto.value!!.id) != null) {
-                viewState.value = currentViewState().copy(isBookmarked = true)
-                Log.d("asdasd", "asdasd")
+                viewState.postValue(currentViewState().copy(isBookmarked = true))
             } else {
-                viewState.value = currentViewState().copy(isBookmarked = false)
-                Log.d("asdasd", "asdasd")
+                viewState.postValue(currentViewState().copy(isBookmarked = false))
             }
         }
     }
-
 
     data class ViewState(
         val isLoading: Boolean = false,
@@ -206,9 +204,9 @@ class PhotoViewModel @Inject constructor(private val repository: PhotoRepository
         val selectedCollection: Int? = null,
         val isBookmarked: Boolean = false,
 
+        val noResaultsFound: Boolean = false,
         val currentQuery: String = ""
     )
 
     fun currentViewState(): ViewState = viewState.value!!
-
 }
