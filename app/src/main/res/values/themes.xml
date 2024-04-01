@@ -9,7 +9,12 @@
         
         <style name="Theme.App.SplashScreen" parent="Theme.SplashScreen">
             <item name="windowSplashScreenBackground">@color/red</item>
-            <item name="windowSplashScreenAnimatedIcon">@drawable/splash_logo</item>
+            <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_logo_foreground</item>
             <item name="postSplashScreenTheme">@style/Base.Theme.PexelsApp</item>
+        </style>
+
+        <style name="BottomNavigationStyle">@style/Widget.App.BottomNavigationView
+            <item name="itemRippleColor">@color/white</item>
+            <item name="itemIconTint">@color/black</item>
         </style>
 </resources>

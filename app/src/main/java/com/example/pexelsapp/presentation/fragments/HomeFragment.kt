@@ -7,21 +7,22 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.example.pexelsapp.databinding.FragmentHomeBinding
-import com.example.pexelsapp.presentation.MainActivity
 import com.example.pexelsapp.presentation.adapter.photo.PhotosAdapter
 import com.example.pexelsapp.presentation.adapter.tag.CollectionsAdapter
 import com.example.pexelsapp.presentation.viewModel.PaginationScrollListener
 import com.example.pexelsapp.presentation.viewModel.PhotoViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
-
+@AndroidEntryPoint
 class HomeFragment : Fragment() {
     private lateinit var binding: FragmentHomeBinding
-    private lateinit var viewModel: PhotoViewModel
+    private val viewModel: PhotoViewModel by activityViewModels()
 
 
     override fun onCreateView(
@@ -35,7 +36,6 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel = (activity as MainActivity).viewModel
 
         val staggeredLayoutManager =
             StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
@@ -61,18 +61,17 @@ class HomeFragment : Fragment() {
         staggeredLayoutManager: StaggeredGridLayoutManager
     ) {
 
-        viewModel.photoList.observe(this, Observer {
+        viewModel.photoList.observe(viewLifecycleOwner, Observer {
             try {
                 if (it != null) {
                     photosAdapter.list = it
-                    Log.d("ELEMENT", "${photosAdapter.itemCount}")
                     photosAdapter.notifyDataSetChanged()
                 }
             } catch (_: Exception) {
             }
         })
 
-        viewModel.collectionList.observe(this, Observer {
+        viewModel.collectionkList.observe(viewLifecycleOwner, Observer {
             try {
                 if (it != null) {
                     collectionsAdapter.list = it
@@ -83,6 +82,7 @@ class HomeFragment : Fragment() {
         })
 
         collectionsAdapter.onClick = {
+            binding.photoRecyclerView.layoutManager!!.scrollToPosition(0)
             viewModel.getPhoto(it.title.text.toString())
             binding.editText.setText(it.title.text.toString())
         }
@@ -92,12 +92,14 @@ class HomeFragment : Fragment() {
             binding.root.findNavController().navigate(action)
         }
 
-        viewModel.viewState.observe(this, Observer<PhotoViewModel.ViewState> {
+        viewModel.viewState.observe(viewLifecycleOwner, Observer<PhotoViewModel.ViewState> {
             render(it)
         })
 
         binding.editText.setOnKeyListener(View.OnKeyListener { _, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
+                binding.clearButton.visibility = View.VISIBLE
+                binding.photoRecyclerView.layoutManager!!.scrollToPosition(0)
                 viewModel.getPhoto(binding.editText.text.toString())
                 return@OnKeyListener true
             }
@@ -108,11 +110,8 @@ class HomeFragment : Fragment() {
             PaginationScrollListener(staggeredLayoutManager) {
             override fun loadMoreItems() {
                 viewModel.loadMorePhoto()
-                Log.d("listener", "OnScroll")
+                Log.d("listener", "----------------------------------------")
             }
-
-            override val isLastPage: Boolean
-                get() = viewModel.currentViewState().isLastPage
             override val isLoading: Boolean
                 get() = viewModel.currentViewState().isLoading
         })
@@ -124,11 +123,9 @@ class HomeFragment : Fragment() {
             false -> binding.progressBar.visibility = View.GONE
         }
         if (viewState.selectedCollection != null) {
-//            val vm = binding.collectionsRecyclerView.layoutManager?.findViewByPosition(viewState.selectedCollection)
-//            vm?.findViewById<CardView>(R.id.card)?.setCardBackgroundColor(R.color.red)
-//            binding.collectionsRecyclerView.layoutManager?.findViewByPosition(viewState.selectedCollection)
-//                ?.setBackgroundColor(R.color.red)
         }
+
+        binding.editText.setText(viewState.currentQuery)
         binding.progressBar.setProgressCompat(viewState.progress, true)
     }
 }

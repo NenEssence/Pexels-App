@@ -8,9 +8,4 @@ import com.example.pexelsapp.databinding.PhotoLayoutBinding
 class PhotosViewHolder(private var itemBinding: PhotoLayoutBinding) :
     RecyclerView.ViewHolder(itemBinding.root) {
     var image: ImageView = itemBinding.photoImage
-    init{
-        itemView.setOnClickListener{
-            Log.d("Click-->", itemBinding.toString())
-        }
-    }
 }

@@ -3,7 +3,7 @@ package com.example.pexelsapp.presentation.adapter.tag
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.pexelsapp.data.remote.model.FeaturedCollection
+import com.example.pexelsapp.domain.model.FeaturedCollection
 import com.example.pexelsapp.databinding.FeaturedCollectionLayoutBinding
 
 class CollectionsAdapter : RecyclerView.Adapter<CollectionsViewHolder>() {

@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.example.pexelsapp.R
-import com.example.pexelsapp.data.remote.model.Photo
+import com.example.pexelsapp.domain.model.Photo
 import com.example.pexelsapp.databinding.PhotoLayoutBinding
 import com.example.pexelsapp.presentation.adapter.tag.CollectionsViewHolder
 
@@ -39,7 +39,7 @@ class PhotosAdapter : RecyclerView.Adapter<PhotosViewHolder>() {
 
     override fun onBindViewHolder(holder: PhotosViewHolder, position: Int) {
 
-        val req = RequestOptions().placeholder(R.drawable.ic_launcher_background)
+        val req = RequestOptions().placeholder(R.drawable.holder)
         //calculate new size
         holder.itemView.layoutParams.height =
             list[position].height - list[position].width - Resources.getSystem().displayMetrics.widthPixels / 2
