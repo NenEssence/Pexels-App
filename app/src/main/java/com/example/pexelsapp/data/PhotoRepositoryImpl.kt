@@ -1,20 +1,20 @@
 package com.example.pexelsapp.data
 
-import com.example.pexelsapp.data.local.PhotoDatabase
+import com.example.pexelsapp.data.local.PhotoDao
 import com.example.pexelsapp.data.local.PhotoDbEntity
 import com.example.pexelsapp.data.remote.PexelsApi
-import com.example.pexelsapp.data.remote.model.PexelsApiResponse
 import com.example.pexelsapp.domain.PhotoRepository
-import retrofit2.Response
+import javax.inject.Singleton
 
-class PhotoRepositoryImpl( private val api: PexelsApi) :
+@Singleton
+class PhotoRepositoryImpl(private val photoDao: PhotoDao, private val api: PexelsApi) :
     PhotoRepository {
-//    override suspend fun insertPhoto(photo: PhotoDbEntity) = db.getPhotoDao().insertPhoto(photo)
-//    override suspend fun deletePhoto(photo: PhotoDbEntity) = db.getPhotoDao().deletePhoto(photo)
-//
-//    override fun getAllPhotos() = db.getPhotoDao().getAllPhotos()
+    override suspend fun insertPhoto(photo: PhotoDbEntity) = photoDao.insertPhoto(photo)
+    override suspend fun deletePhoto(id: Int) = photoDao.deletePhoto(id)
+    override suspend fun findPhotoById(id: Int) = photoDao.findPhotoById(id)
+    override fun getAllPhotos() = photoDao.getAllPhotos()
 
-    override suspend fun loadPhoto(query: String) = api.getPhoto(query)
-    override suspend fun loadMorePhoto(page: Int,query: String) = api.loadMorePhoto(page,query)
-    override suspend fun getFeaturedCollections() = api.getFeaturedCollections()
+    override suspend fun loadPhoto(page: Int, query: String) = api.loadPhoto(page, query)
+    override suspend fun loadCuratedPhoto(page: Int) = api.loadCuratedPhoto(page)
+    override suspend fun loadFeaturedCollections() = api.loadFeaturedCollections()
 }

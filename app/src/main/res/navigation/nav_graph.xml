@@ -25,9 +25,12 @@
         <action
             android:id="@+id/action_bookmarkFragment_to_homeFragment"
             app:destination="@id/homeFragment" />
+        <action
+            android:id="@+id/action_bookmarkFragment_to_detailsFragment"
+            app:destination="@id/detailsFragment" />
     </fragment>
     <fragment
         android:id="@+id/detailsFragment"
-        android:name="DetailsFragment"
+        android:name="com.example.pexelsapp.presentation.fragments.DetailsFragment"
         android:label="DetailsFragment" />
 </navigation>

@@ -18,7 +18,7 @@ abstract class PaginationScrollListener(private val layoutManager: StaggeredGrid
 
         firstVisibleItemPosition = firstVisibleItemPositions[0]
 
-        if (!isLoading && !isLastPage) {
+        if (!isLoading) {
             if (visibleItemCount + firstVisibleItemPosition >= totalItemCount
                 && firstVisibleItemPosition >= 0
             ) {
@@ -28,6 +28,5 @@ abstract class PaginationScrollListener(private val layoutManager: StaggeredGrid
     }
 
     protected abstract fun loadMoreItems()
-    abstract val isLastPage: Boolean
     abstract val isLoading: Boolean
 }
