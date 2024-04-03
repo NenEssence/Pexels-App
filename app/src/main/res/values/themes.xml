@@ -17,4 +17,8 @@
             <item name="itemRippleColor">@color/white</item>
             <item name="itemIconTint">@color/black</item>
         </style>
+
+        <style name="EditTextTheme">
+            <item name="backgroundTint">@color/focus_tint</item>
+        </style>
 </resources>

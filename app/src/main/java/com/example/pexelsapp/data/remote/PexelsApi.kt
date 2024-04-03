@@ -16,14 +16,6 @@ interface PexelsApi {
         @Query("per_page") perpage: Int = 30
     ): Response<PexelsApiResponse>
 
-//    @Headers("Authorization: S3aEK0YKhQmibMS9O8oK9W79a38P11Y0MbQKjhyXtZTCzJ1AnMXWBIlz")
-//    @GET("search/")
-//    suspend fun loadMorePhoto(
-//        @Query("page") page: Int,
-//        @Query("query") query: String,
-//        @Query("per_page") perpage: Int = 30
-//    ): Response<PexelsApiResponse>
-
     @Headers("Authorization: S3aEK0YKhQmibMS9O8oK9W79a38P11Y0MbQKjhyXtZTCzJ1AnMXWBIlz")
     @GET("collections/featured")
     suspend fun loadFeaturedCollections(

@@ -11,6 +11,7 @@ import androidx.lifecycle.asLiveData
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.example.pexelsapp.databinding.FragmentBookmarkBinding
+import com.example.pexelsapp.presentation.MainActivity
 import com.example.pexelsapp.presentation.adapter.bookmark.BookmarksAdapter
 import com.example.pexelsapp.presentation.viewModel.PhotoViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -42,6 +43,7 @@ class BookmarkFragment : Fragment() {
 
         viewModel.getBookmarks().asLiveData().observe(viewLifecycleOwner, Observer {
             bookmarksAdapter.list = it
+            viewModel.bookmarksCheck(it)
             bookmarksAdapter.notifyDataSetChanged()
         })
 
@@ -50,6 +52,20 @@ class BookmarkFragment : Fragment() {
             val action = BookmarkFragmentDirections.actionBookmarkFragmentToDetailsFragment()
             binding.root.findNavController().navigate(action)
         }
+
+        binding.exploreButton.setOnClickListener{
+            val action = BookmarkFragmentDirections.actionBookmarkFragmentToHomeFragment()
+            binding.root.findNavController().navigate(action)
+        }
+        viewModel.viewState.observe(viewLifecycleOwner, Observer<PhotoViewModel.ViewState> {
+            render(it)
+        })
     }
 
+    private fun render(viewState: PhotoViewModel.ViewState) {
+        when (viewState.noBookmarksFound) {
+            true -> binding.bookmarkRecyclerView.visibility = View.GONE
+            false -> binding.bookmarkRecyclerView.visibility = View.VISIBLE
+        }
+    }
 }

@@ -29,6 +29,6 @@
         android:background="@color/white"
         android:paddingTop="20dp"
         app:menu="@menu/bottom_nav"
-        android:elevation="3dp"/>
+        app:elevation="5dp"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

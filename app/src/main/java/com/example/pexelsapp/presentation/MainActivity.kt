@@ -42,13 +42,11 @@ class MainActivity : AppCompatActivity() {
                 when (it.itemId) {
                     R.id.homeFragment -> {
                         navController.navigate(R.id.action_bookmarkFragment_to_homeFragment)
-                        setActiveIcon(0)
                         true
                     }
 
                     R.id.bookmarkFragment -> {
                         navController.navigate(R.id.action_homeFragment_to_bookmarkFragment)
-                        setActiveIcon(1)
                         true
                     }
                     else -> false
@@ -61,9 +59,14 @@ class MainActivity : AppCompatActivity() {
             } else {
                 binding.bottomNavigationView.visibility = View.VISIBLE
             }
+            when (destination.id){
+                R.id.homeFragment ->setActiveIcon(0)
+                R.id.bookmarkFragment -> setActiveIcon(1)
+            }
         }
+
     }
-    private fun setActiveIcon(item:Int){
+    fun setActiveIcon(item:Int){
         when(item){
             0 -> {  binding.bottomNavigationView.menu.getItem(0)
                 .setIcon(R.drawable.home_icon_active)

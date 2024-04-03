@@ -14,6 +14,7 @@ import com.example.pexelsapp.domain.PhotoRepository
 import com.example.pexelsapp.domain.model.FeaturedCollection
 import com.example.pexelsapp.domain.model.Photo
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -23,7 +24,9 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Timer
 import javax.inject.Inject
+import kotlin.concurrent.timerTask
 
 @HiltViewModel
 class PhotoViewModel @Inject constructor(private val repository: PhotoRepository) : ViewModel() {
@@ -35,49 +38,125 @@ class PhotoViewModel @Inject constructor(private val repository: PhotoRepository
 
     private var currentQuery: String = ""
     private var page = 1
-
+    private val handler = CoroutineExceptionHandler { _, exception ->
+        viewState.value =
+            currentViewState().copy(noInternerConnection = true)
+    }
 
     init {
         viewState.value = ViewState()
         getFeaturedCollections()
-        getPhoto(currentQuery)
+        startLoad()
+        getBookmarks()
     }
 
     fun getPhoto(newQuery: String) {
-        when (newQuery) {
-            "" -> {
-                viewState.postValue(currentViewState().copy(currentQuery = newQuery))
-                viewModelScope.launch {
-                    page = 1
-                    val response = repository.loadCuratedPhoto(page)
-                    photoList.postValue(response.body()?.photos)
-                }
-            }
-
-            else -> {
-                checkCollection(newQuery)
-                currentQuery = newQuery
-                viewState.postValue(currentViewState().copy(currentQuery = newQuery))
-                viewModelScope.launch {
-                    page = 1
-                    val response = repository.loadPhoto(page, newQuery)
-                    Log.d("-->",response.body()?.total_results.toString())
-                    if (response.body()?.total_results == 0) {
-                        viewState.postValue(currentViewState().copy(noResaultsFound = true))
-                    } else {
-                        viewState.postValue(currentViewState().copy(noResaultsFound = false))
+        Log.d("GETPHOTO", newQuery)
+        if (newQuery != currentQuery) {
+            viewState.value = currentViewState().copy(isLoading = true)
+            currentQuery = newQuery
+            Log.d("NEWQUERY", newQuery)
+            viewState.value =
+                currentViewState().copy(currentQuery = newQuery)
+            when (newQuery) {
+                "" -> {
+                    viewState.value = currentViewState().copy(progress = 50)
+                    viewState.value = currentViewState().copy(noResaultsFound = false)
+                    viewModelScope.launch(handler) {
+                        page = 1
+                        val response = repository.loadCuratedPhoto(page)
+                        photoList.postValue(response.body()?.photos)
+                        viewState.value = currentViewState().copy(noInternerConnection = false,progress = 100)
                     }
-                    photoList.postValue(response.body()?.photos)
+                    Timer().schedule(timerTask {
+                        viewState.postValue(
+                            currentViewState().copy(isLoading = false, progress = 0))
+                    }, 2000)
+                }
+
+                else -> {
+                    checkCollection(newQuery)
+                    viewModelScope.launch(handler) {
+
+                        page = 1
+                        val response = repository.loadPhoto(page, newQuery)
+                        when (response.body()?.photos?.isEmpty()) {
+                            true -> viewState.value =
+                                currentViewState().copy(noResaultsFound = true)
+
+                            false -> viewState.value =
+                                currentViewState().copy(noResaultsFound = false)
+
+                            else -> viewState.value =
+                                currentViewState().copy(noResaultsFound = true)
+                        }
+                        photoList.postValue(response.body()?.photos)
+                        viewState.value = currentViewState().copy(noInternerConnection = false,progress = 100)
+                    }
+                    Timer().schedule(timerTask {
+                        viewState.postValue(
+                            currentViewState().copy(isLoading = false, progress = 0))
+                    }, 2000)
                 }
             }
         }
     }
 
+    fun tryAgain() {
+        Log.d("TRYAGAIN", currentQuery)
+        getFeaturedCollections()
+        viewState.value = currentViewState().copy(isLoading = true)
+        when (currentQuery) {
+            "" -> {
+                viewState.value = currentViewState().copy(noResaultsFound = false)
+                viewState.value = currentViewState().copy(progress = 50)
+                viewModelScope.launch(handler) {
+                    page = 1
+                    val response = repository.loadCuratedPhoto(page)
+                    photoList.postValue(response.body()?.photos)
+                    viewState.value = currentViewState().copy(noInternerConnection = false,progress = 100)
+                }
+                Timer().schedule(timerTask {
+                    viewState.postValue(
+                        currentViewState().copy(isLoading = false, progress = 0))
+                }, 2000)
+            }
+
+            else -> {
+                checkCollection(currentQuery)
+                viewState.value = currentViewState().copy(progress = 50)
+                viewModelScope.launch(handler) {
+                    page = 1
+                    val response = repository.loadPhoto(page, currentQuery)
+                    when (response.body()?.photos?.isEmpty()) {
+                        true -> viewState.value = currentViewState().copy(noResaultsFound = true)
+                        false -> viewState.value = currentViewState().copy(noResaultsFound = false)
+                        else -> {}
+                    }
+                    photoList.postValue(response.body()?.photos)
+                    viewState.value = currentViewState().copy(noInternerConnection = false,progress = 100)
+                }
+                Timer().schedule(timerTask {
+                    viewState.postValue(
+                        currentViewState().copy(isLoading = false, progress = 0))
+                }, 2000)
+            }
+        }
+    }
+
+    private fun startLoad() {
+        viewModelScope.launch(handler) {
+            page = 1
+            val response = repository.loadCuratedPhoto(page)
+            photoList.postValue(response.body()?.photos)
+            viewState.value = currentViewState().copy(noInternerConnection = false)
+        }
+    }
 
     fun loadMorePhoto() {
         viewState.value = currentViewState().copy(isLoading = true)
-        when (viewState.value!!.currentQuery) {
-            "" -> viewModelScope.launch {
+        when (currentQuery) {
+            "" -> viewModelScope.launch(handler) {
                 page++
                 val response = repository.loadCuratedPhoto(page)
                 photoList.value = photoList.value?.plus(response.body()?.photos as List<Photo>)
@@ -85,26 +164,25 @@ class PhotoViewModel @Inject constructor(private val repository: PhotoRepository
             }
 
             else ->
-                viewModelScope.launch {
+                viewModelScope.launch(handler) {
                     page++
                     val response = repository.loadPhoto(page, currentQuery)
-                    photoList.value = photoList.value?.plus(response.body()?.photos as List<Photo>)
-                    viewState.postValue(currentViewState().copy(isLoading = false))
+                    photoList.value =
+                        photoList.value?.plus(response.body()?.photos as List<Photo>)
+                    viewState.value = currentViewState().copy(isLoading = false)
                 }
-
         }
     }
 
     private fun checkCollection(newQuery: String) {
-        viewState.postValue(currentViewState().copy(currentQuery = newQuery))
+//        viewState.postValue(currentViewState().copy(currentQuery = newQuery))
         //Search in loaded Featured Collections
         val findCollection = collectionkList.value?.find { it.title == newQuery }
         if (findCollection != null) {
-            viewState.postValue(
-                currentViewState().copy(
-                    selectedCollection = collectionkList.value!!.indexOf(findCollection)
-                )
+            viewState.value = currentViewState().copy(
+                selectedCollection = collectionkList.value!!.indexOf(findCollection)
             )
+
         } else {
             viewState.postValue(
                 currentViewState().copy(
@@ -115,7 +193,7 @@ class PhotoViewModel @Inject constructor(private val repository: PhotoRepository
     }
 
     fun getFeaturedCollections() {
-        viewModelScope.launch {
+        viewModelScope.launch(handler) {
             val response = repository.loadFeaturedCollections()
             collectionkList.postValue(response.body()?.collections)
         }
@@ -123,6 +201,13 @@ class PhotoViewModel @Inject constructor(private val repository: PhotoRepository
 
     fun getBookmarks(): Flow<List<Photo>> {
         return repository.getAllPhotos().map { it.toList().map { it1 -> it1.toPhoto() } }
+    }
+
+    fun bookmarksCheck(it: List<Photo>) {
+        when (it) {
+            emptyList<Photo>() -> viewState.postValue(currentViewState().copy(noBookmarksFound = true))
+            else -> viewState.postValue(currentViewState().copy(noBookmarksFound = false))
+        }
     }
 
     fun setDetailsState(photo: Photo) {
@@ -148,8 +233,8 @@ class PhotoViewModel @Inject constructor(private val repository: PhotoRepository
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fileOutPutStream)
             fileOutPutStream.flush()
             fileOutPutStream.close()
-            viewState.postValue(currentViewState().copy(isToastDownload = true))
-            viewState.postValue(currentViewState().copy(isToastDownload = false))
+            viewState.value = currentViewState().copy(isToastDownload = true)
+            viewState.value = currentViewState().copy(isToastDownload = false)
         } catch (e: FileNotFoundException) {
             e.printStackTrace()
         } catch (e: IOException) {
@@ -180,18 +265,21 @@ class PhotoViewModel @Inject constructor(private val repository: PhotoRepository
                         photo.width
                     )
                 )
-                viewState.postValue(currentViewState().copy(isBookmarked = true))
+                viewState.value = currentViewState().copy(isBookmarked = true)
             }
         }
     }
 
     fun checkBookmarked() {
-        viewModelScope.launch {
-            if (repository.findPhotoById(detailsPhoto.value!!.id) != null) {
-                viewState.postValue(currentViewState().copy(isBookmarked = true))
-            } else {
-                viewState.postValue(currentViewState().copy(isBookmarked = false))
+        try {
+            viewModelScope.launch {
+                if (repository.findPhotoById(detailsPhoto.value!!.id) != null) {
+                    viewState.value = currentViewState().copy(isBookmarked = true)
+                } else {
+                    viewState.value = currentViewState().copy(isBookmarked = false)
+                }
             }
+        } catch (e: Exception) {
         }
     }
 
@@ -204,6 +292,8 @@ class PhotoViewModel @Inject constructor(private val repository: PhotoRepository
         val selectedCollection: Int? = null,
         val isBookmarked: Boolean = false,
 
+        val noInternerConnection: Boolean = false,
+        val noBookmarksFound: Boolean = false,
         val noResaultsFound: Boolean = false,
         val currentQuery: String = ""
     )

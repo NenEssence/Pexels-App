@@ -18,7 +18,6 @@ interface PhotoDao {
 
     @Query("DELETE FROM PHOTOS WHERE id = :id")
     suspend fun deletePhoto(id: Int)
-
     @Query("SELECT * FROM PHOTOS")
     fun getAllPhotos(): Flow<List<PhotoDbEntity>>
 

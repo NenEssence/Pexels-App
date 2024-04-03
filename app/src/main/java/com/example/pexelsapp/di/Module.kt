@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.example.pexelsapp.data.PhotoRepositoryImpl
 import com.example.pexelsapp.data.local.PhotoDao
 import com.example.pexelsapp.data.local.PhotoDatabase
+import com.example.pexelsapp.data.remote.NetworkConnectionInterceptor
 import com.example.pexelsapp.data.remote.PexelsApi
 import com.example.pexelsapp.domain.PhotoRepository
 import dagger.Module
@@ -37,10 +38,17 @@ object Module {
 
 
     @Provides
-    fun providesRetrofit(): Retrofit =
+    fun providesRetrofit(client: OkHttpClient): Retrofit =
         Retrofit.Builder()
             .baseUrl("https://api.pexels.com/v1/")
+            .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
+    @Provides
+    fun providesClient(loggingInterceptor: NetworkConnectionInterceptor): OkHttpClient =
+        OkHttpClient.Builder().addInterceptor(loggingInterceptor).build()
+
+    @Provides
+    fun provideLoggingIntercepter(@ApplicationContext context: Context): NetworkConnectionInterceptor = NetworkConnectionInterceptor(context)
 }
