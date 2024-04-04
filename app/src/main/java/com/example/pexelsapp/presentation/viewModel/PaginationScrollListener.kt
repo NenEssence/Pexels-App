@@ -11,17 +11,14 @@ abstract class PaginationScrollListener(private val layoutManager: StaggeredGrid
 
         val visibleItemCount = layoutManager.childCount
         val totalItemCount = layoutManager.itemCount
-        var firstVisibleItemPosition = 0
+        val firstVisibleItemPosition: Int
 
-        val firstVisibleItemPositions =
-            layoutManager.findFirstVisibleItemPositions(null)
+        val firstVisibleItemPositions = layoutManager.findFirstVisibleItemPositions(null)
 
         firstVisibleItemPosition = firstVisibleItemPositions[0]
 
         if (!isLoading) {
-            if (visibleItemCount + firstVisibleItemPosition >= totalItemCount
-                && firstVisibleItemPosition >= 0
-            ) {
+            if (visibleItemCount + firstVisibleItemPosition >= totalItemCount && firstVisibleItemPosition >= 0) {
                 loadMoreItems()
             }
         }

@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".presentation.MainActivity">
 
+
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/nav_host_fragment"
         android:name="androidx.navigation.fragment.NavHostFragment"
@@ -19,16 +20,68 @@
         app:layout_constraintTop_toTopOf="parent"
         app:navGraph="@navigation/nav_graph" />
 
+    <View
+        android:id="@+id/elevation"
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:background="@color/gray"
+        app:layout_constraintBottom_toTopOf="@+id/selector_layout" />
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigationView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:paddingTop="15dp"
+        app:backgroundTint="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:itemActiveIndicatorStyle="@color/white"
+        app:itemRippleColor="@color/white"
+        app:menu="@menu/bottom_nav" />
+
+    <LinearLayout
+        android:id="@+id/selector_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:background="@color/white"
-        android:paddingTop="20dp"
-        app:menu="@menu/bottom_nav"
-        app:elevation="5dp"/>
+        app:layout_constraintBottom_toTopOf="@id/bottomNavigationView"
+        android:baselineAligned="false">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="end">
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/homeSelector"
+                android:layout_width="40dp"
+                android:layout_height="5dp"
+                android:layout_marginEnd="64dp"
+                app:cardCornerRadius="5dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="@color/white"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="start">
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/bookmarkSelector"
+                android:layout_width="40dp"
+                android:layout_marginStart="64dp"
+                android:layout_height="5dp"
+                app:cardCornerRadius="5dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="@color/white"/>
+        </LinearLayout>
+
+
+    </LinearLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

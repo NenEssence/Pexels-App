@@ -50,5 +50,6 @@ object Module {
         OkHttpClient.Builder().addInterceptor(loggingInterceptor).build()
 
     @Provides
-    fun provideLoggingIntercepter(@ApplicationContext context: Context): NetworkConnectionInterceptor = NetworkConnectionInterceptor(context)
+    fun provideLoggingIntercepter(@ApplicationContext context: Context): NetworkConnectionInterceptor =
+        NetworkConnectionInterceptor(context)
 }
