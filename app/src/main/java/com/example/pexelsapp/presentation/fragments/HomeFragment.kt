@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.example.pexelsapp.databinding.FragmentHomeBinding
 import com.example.pexelsapp.presentation.adapter.photo.PhotosAdapter
-import com.example.pexelsapp.presentation.adapter.tag.CollectionsAdapter
+import com.example.pexelsapp.presentation.adapter.collection.CollectionsAdapter
 import com.example.pexelsapp.presentation.viewModel.PaginationScrollListener
 import com.example.pexelsapp.presentation.viewModel.PhotoViewModel
 import com.google.android.material.internal.ViewUtils.hideKeyboard
@@ -30,12 +29,12 @@ import kotlinx.coroutines.launch
 class HomeFragment : Fragment() {
     private lateinit var binding: FragmentHomeBinding
     private val viewModel: PhotoViewModel by activityViewModels()
-
+    private val photosAdapter = PhotosAdapter()
+    private val collectionsAdapter = CollectionsAdapter()
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View {
         binding = FragmentHomeBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -43,40 +42,38 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
         val staggeredLayoutManager =
             StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
         val linearLayoutManager =
             LinearLayoutManager(this.context, LinearLayoutManager.HORIZONTAL, false)
 
-        val photosAdapter = PhotosAdapter()
-        val collectionsAdapter = CollectionsAdapter()
+        binding.photoRecyclerView.let {
+            it.adapter = photosAdapter
+            it.layoutManager = staggeredLayoutManager
+            it.setHasFixedSize(true)
+        }
 
+        binding.collectionsRecyclerView.let {
+            it.adapter = collectionsAdapter
+            it.layoutManager = linearLayoutManager
+        }
 
-        binding.photoRecyclerView.adapter = photosAdapter
-        binding.photoRecyclerView.layoutManager = staggeredLayoutManager
-        binding.photoRecyclerView.setHasFixedSize(true)
-
-        binding.collectionsRecyclerView.adapter = collectionsAdapter
-        binding.collectionsRecyclerView.layoutManager = linearLayoutManager
-        setObservers(photosAdapter, collectionsAdapter, staggeredLayoutManager)
+        setObservers(staggeredLayoutManager)
     }
 
     @SuppressLint("RestrictedApi")
     private fun setObservers(
-        photosAdapter: PhotosAdapter,
-        collectionsAdapter: CollectionsAdapter,
         staggeredLayoutManager: StaggeredGridLayoutManager
     ) {
 
-        viewModel.photoList.observe(viewLifecycleOwner, Observer {
+        viewModel.photoList.observe(viewLifecycleOwner) {
             if (it != null) {
                 photosAdapter.list = it
                 photosAdapter.notifyDataSetChanged()
             }
-        })
+        }
 
-        viewModel.collectionkList.observe(viewLifecycleOwner, Observer {
+        viewModel.collectionList.observe(viewLifecycleOwner) {
             try {
                 if (it != null) {
                     collectionsAdapter.list = it
@@ -84,11 +81,10 @@ class HomeFragment : Fragment() {
                 }
             } catch (_: Exception) {
             }
-        })
+        }
 
-        collectionsAdapter.onClick = {
+        collectionsAdapter.onClick = { it ->
             binding.photoRecyclerView.layoutManager!!.scrollToPosition(0)
-            binding.searchView.requestFocus()
             binding.searchView.setQuery(it.title.text.toString(), false)
         }
         photosAdapter.onClick = {
@@ -101,7 +97,7 @@ class HomeFragment : Fragment() {
         binding.searchView.setOnQueryTextListener(object :
             androidx.appcompat.widget.SearchView.OnQueryTextListener {
             private var debounceJob: Job? = null
-            private val DELAY: Long = 2000L
+            private val DELAY: Long = 1000L
             override fun onQueryTextSubmit(query: String?): Boolean {
                 viewModel.getPhoto(query.toString())
                 binding.searchView.clearFocus()
@@ -110,8 +106,8 @@ class HomeFragment : Fragment() {
 
             override fun onQueryTextChange(newText: String?): Boolean {
                 debounceJob?.cancel()
-                debounceJob = this@HomeFragment.viewLifecycleOwner.lifecycle.coroutineScope
-                    .launch(Dispatchers.Main) {
+                debounceJob =
+                    this@HomeFragment.viewLifecycleOwner.lifecycle.coroutineScope.launch(Dispatchers.Main) {
                         delay(DELAY)
                         viewModel.getPhoto(newText.toString())
                     }
@@ -124,8 +120,8 @@ class HomeFragment : Fragment() {
         binding.tryAgainButton.setOnClickListener {
             viewModel.tryAgain()
         }
-        binding.exploreButton.setOnClickListener{
-            binding.searchView.setQuery("",false)
+        binding.exploreButton.setOnClickListener {
+            binding.searchView.setQuery("", false)
         }
 
         binding.photoRecyclerView.addOnScrollListener(object :
@@ -146,9 +142,9 @@ class HomeFragment : Fragment() {
             }
         })
 
-        viewModel.viewState.observe(viewLifecycleOwner, Observer<PhotoViewModel.ViewState> {
+        viewModel.viewState.observe(viewLifecycleOwner) {
             render(it)
-        })
+        }
     }
 
     @SuppressLint("RestrictedApi")
@@ -188,8 +184,18 @@ class HomeFragment : Fragment() {
                 }
             }
         }
-//        binding.searchView.setQuery(viewState.currentQuery, false)
+        when (viewState.selectedCollection) {
+            null -> {
+                collectionsAdapter.selected = null
+                collectionsAdapter.notifyDataSetChanged()
+            }
 
+            else -> {
+                collectionsAdapter.selected = viewState.selectedCollection
+                collectionsAdapter.notifyDataSetChanged()
+            }
+        }
+        binding.searchView.setQuery(viewState.currentQuery, false)
         binding.progressBar.setProgressCompat(viewState.progress, true)
     }
 }

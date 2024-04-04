@@ -1,10 +1,12 @@
 package com.example.pexelsapp.presentation
 
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
@@ -27,12 +29,13 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         this.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING)
-        navController = (binding.navHostFragment.getFragment<NavHostFragment>())
-            .findNavController()
+        navController = (binding.navHostFragment.getFragment<NavHostFragment>()).findNavController()
 
+        binding.bottomNavigationView.let {
+            it.setupWithNavController(navController)
+            it.itemIconTintList = null
+        }
 
-        binding.bottomNavigationView.setupWithNavController(navController)
-        binding.bottomNavigationView.itemIconTintList = null
         setActiveIcon(0)
         binding.bottomNavigationView.setOnItemSelectedListener {
 
@@ -49,6 +52,7 @@ class MainActivity : AppCompatActivity() {
                         navController.navigate(R.id.action_homeFragment_to_bookmarkFragment)
                         true
                     }
+
                     else -> false
                 }
             }
@@ -56,27 +60,52 @@ class MainActivity : AppCompatActivity() {
         navController.addOnDestinationChangedListener { _, destination, _ ->
             if (destination.id == R.id.detailsFragment) {
                 binding.bottomNavigationView.visibility = View.GONE
+                binding.selectorLayout.visibility = View.GONE
             } else {
                 binding.bottomNavigationView.visibility = View.VISIBLE
+                binding.selectorLayout.visibility = View.VISIBLE
             }
-            when (destination.id){
-                R.id.homeFragment ->setActiveIcon(0)
+            when (destination.id) {
+                R.id.homeFragment -> setActiveIcon(0)
                 R.id.bookmarkFragment -> setActiveIcon(1)
             }
         }
 
     }
-    fun setActiveIcon(item:Int){
-        when(item){
-            0 -> {  binding.bottomNavigationView.menu.getItem(0)
-                .setIcon(R.drawable.home_icon_active)
+
+    @SuppressLint("ResourceAsColor")
+    fun setActiveIcon(item: Int) {
+        when (item) {
+            0 -> {
+                binding.bottomNavigationView.menu.getItem(0).setIcon(R.drawable.home_icon_active)
                 binding.bottomNavigationView.menu.getItem(1)
-                    .setIcon(R.drawable.bookmark_icon_inactive)}
+                    .setIcon(R.drawable.bookmark_icon_inactive)
+                binding.homeSelector.setCardBackgroundColor(
+                    ContextCompat.getColor(
+                        this, R.color.red
+                    )
+                )
+                binding.bookmarkSelector.setCardBackgroundColor(
+                    ContextCompat.getColor(
+                        this, R.color.white
+                    )
+                )
+            }
+
             1 -> {
-                binding.bottomNavigationView.menu.getItem(0)
-                    .setIcon(R.drawable.home_icon_inactive)
+                binding.bottomNavigationView.menu.getItem(0).setIcon(R.drawable.home_icon_inactive)
                 binding.bottomNavigationView.menu.getItem(1)
                     .setIcon(R.drawable.bookmark_icon_active)
+                binding.homeSelector.setCardBackgroundColor(
+                    ContextCompat.getColor(
+                        this, R.color.white
+                    )
+                )
+                binding.bookmarkSelector.setCardBackgroundColor(
+                    ContextCompat.getColor(
+                        this, R.color.red
+                    )
+                )
             }
         }
     }

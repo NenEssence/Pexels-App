@@ -15,7 +15,7 @@
         android:roundIcon="@mipmap/ic_pixelslauncher"
         android:supportsRtl="true"
         android:theme="@style/Theme.PexelsApp"
-        tools:targetApi="31">
+        tools:targetApi="34">
         <activity
             android:name=".presentation.MainActivity"
             android:exported="true"

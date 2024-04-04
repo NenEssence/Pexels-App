@@ -1,14 +1,12 @@
 package com.example.pexelsapp.presentation.fragments
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
 import com.bumptech.glide.Glide
 import com.example.pexelsapp.R
@@ -21,9 +19,8 @@ class DetailsFragment : Fragment() {
     private lateinit var binding: FragmentDetailsBinding
     private val viewModel: PhotoViewModel by activityViewModels()
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View {
         binding = FragmentDetailsBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -34,31 +31,28 @@ class DetailsFragment : Fragment() {
             binding.root.findNavController().popBackStack()
         }
 
-        viewModel.detailsPhoto.observe(viewLifecycleOwner, Observer {
-            Glide.with(this)
-                .load(it.src.portrait)
-                .centerCrop()
-                .into(binding.detailsImage)
-        })
+        viewModel.detailsPhoto.observe(viewLifecycleOwner) {
+            Glide.with(this).load(it.src.portrait).centerCrop().into(binding.detailsImage)
+        }
         binding.author.text = viewModel.detailsPhoto.value?.photographer
         viewModel.checkBookmarked()
         binding.buttonDownload.setOnClickListener {
             viewModel.saveImage(binding.detailsImage.drawable)
         }
 
-        viewModel.viewState.observe(viewLifecycleOwner, Observer {
+        viewModel.viewState.observe(viewLifecycleOwner) {
             when (it.isToastDownload) {
                 true -> Toast.makeText(this.context, "Picture saved", Toast.LENGTH_SHORT).show()
                 false -> {}
             }
-        })
-        binding.buttonAddBookmark.setOnClickListener{
+        }
+        binding.buttonAddBookmark.setOnClickListener {
             viewModel.detailsPhoto.value?.let { it1 -> viewModel.bookmarkPhoto(it1) }
         }
 
-        viewModel.viewState.observe(viewLifecycleOwner, Observer<PhotoViewModel.ViewState> {
+        viewModel.viewState.observe(viewLifecycleOwner) {
             render(it)
-        })
+        }
     }
 
     private fun render(viewState: PhotoViewModel.ViewState) {

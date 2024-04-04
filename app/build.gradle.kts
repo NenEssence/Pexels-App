@@ -14,7 +14,7 @@ android {
     defaultConfig {
         applicationId = "com.example.pexelsapp"
         minSdk = 26
-        targetSdk = 33
+        targetSdk = 34
         versionCode = 1
         versionName = "0.6.0"
 
