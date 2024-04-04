@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:title=""
+        android:id="@+id/homeFragment"
+        android:icon="@drawable/home_icon_inactive"/>
+    <item
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:title=""
+        android:id="@+id/bookmarkFragment"
+        android:icon="@drawable/bookmark_icon_inactive"/>
+</menu>
