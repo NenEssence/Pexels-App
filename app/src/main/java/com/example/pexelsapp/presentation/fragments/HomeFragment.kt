@@ -93,7 +93,7 @@ class HomeFragment : Fragment() {
 
         collectionsAdapter.onClick = { it ->
             binding.photoRecyclerView.layoutManager!!.scrollToPosition(0)
-            binding.searchView.setQuery(it.title.text.toString(), false)
+            binding.searchView.setQuery(it.title.text.toString(), true)
         }
         photosAdapter.onClick = {
             viewModel.setDetailsState(it)
@@ -113,14 +113,18 @@ class HomeFragment : Fragment() {
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                debounceJob?.cancel()
-                debounceJob =
-                    this@HomeFragment.viewLifecycleOwner.lifecycle.coroutineScope.launch(Dispatchers.Main) {
-                        delay(DELAY)
-                        viewModel.getPhoto(newText.toString())
-                    }
-                return true
-            }
+                if (binding.searchView.hasFocus()) {
+                    debounceJob?.cancel()
+                    debounceJob =
+                        this@HomeFragment.viewLifecycleOwner.lifecycle.coroutineScope.launch(
+                            Dispatchers.Main
+                        ) {
+                            delay(DELAY)
+                            viewModel.getPhoto(newText.toString())
+                        }
+                }
+                    return true
+                }
         })
 
 
