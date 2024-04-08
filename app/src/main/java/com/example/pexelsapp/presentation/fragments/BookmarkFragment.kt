@@ -6,13 +6,17 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.asLiveData
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.example.pexelsapp.databinding.FragmentBookmarkBinding
 import com.example.pexelsapp.presentation.adapter.bookmark.BookmarksAdapter
 import com.example.pexelsapp.presentation.viewModel.PhotoViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class BookmarkFragment : Fragment() {
@@ -21,6 +25,12 @@ class BookmarkFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.viewState.collect { render(it) }
+
+            }
+        }
         binding = FragmentBookmarkBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -53,9 +63,6 @@ class BookmarkFragment : Fragment() {
         binding.exploreButton.setOnClickListener {
             val action = BookmarkFragmentDirections.actionBookmarkFragmentToHomeFragment()
             binding.root.findNavController().navigate(action)
-        }
-        viewModel.viewState.observe(viewLifecycleOwner) {
-            render(it)
         }
     }
 
