@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
@@ -48,12 +49,6 @@ class DetailsFragment : Fragment() {
             viewModel.saveImage(binding.detailsImage.drawable)
         }
 
-//        viewModel.viewState.observe(viewLifecycleOwner) {
-//            when (it.isToastDownload) {
-//                true -> Toast.makeText(this.context, "Picture saved", Toast.LENGTH_SHORT).show()
-//                false -> {}
-//            }
-//        }
         binding.buttonAddBookmark.setOnClickListener {
             viewModel.detailsPhoto.value?.let { it1 -> viewModel.bookmarkPhoto(it1) }
         }
@@ -63,6 +58,10 @@ class DetailsFragment : Fragment() {
         when (viewState.isBookmarked) {
             true -> binding.buttonAddBookmark.setImageResource(R.drawable.bookmark_button_active)
             false -> binding.buttonAddBookmark.setImageResource(R.drawable.bookmark_button_inactive)
+        }
+        when (viewState.isToastDownload) {
+            true -> Toast.makeText(this.context, "Picture saved", Toast.LENGTH_SHORT).show()
+            false -> {}
         }
     }
 

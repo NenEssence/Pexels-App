@@ -159,12 +159,18 @@ class PhotoViewModel @Inject constructor(private val repository: PhotoRepository
     }
 
     private fun startLoad() {
+        _viewState.value = currentViewState().copy(isLoading = true)
         viewModelScope.launch(handler) {
             page = 1
+            _viewState.value = currentViewState().copy(progress = 50)
             val response = repository.loadCuratedPhoto(page)
             _photoList.postValue(response.body()?.photos)
             _viewState.value = currentViewState().copy(noInternerConnection = false)
+            _viewState.value = currentViewState().copy(progress = 100)
         }
+        Timer().schedule(timerTask {
+            _viewState.value = currentViewState().copy(isLoading = false, progress = 0)
+        }, 2000)
     }
 
     fun loadMorePhoto() {
