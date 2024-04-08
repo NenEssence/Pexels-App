@@ -1,5 +1,5 @@
 <h1 align ="center">  Pexels App </h1>
-<p align="center">Version: 1.0.0</p>
+<p align="center">Version: 1.1.0</p>
 <p align ="center">
 </p>
 
