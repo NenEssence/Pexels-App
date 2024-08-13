@@ -145,7 +145,7 @@ class PhotoViewModel @Inject constructor(private val repository: PhotoRepository
                     when (response.body()?.photos?.isEmpty()) {
                         true -> _viewState.value = currentViewState().copy(noResaultsFound = true)
                         false -> _viewState.value = currentViewState().copy(noResaultsFound = false)
-                        else -> {}
+                        else -> _viewState.value = currentViewState().copy(noResaultsFound = true)
                     }
                     _photoList.postValue(response.body()?.photos)
                     _viewState.value =

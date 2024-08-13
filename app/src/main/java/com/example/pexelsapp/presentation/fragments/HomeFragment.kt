@@ -101,7 +101,6 @@ class HomeFragment : Fragment() {
             binding.root.findNavController().navigate(action)
         }
 
-
         binding.searchView.setOnQueryTextListener(object :
             androidx.appcompat.widget.SearchView.OnQueryTextListener {
             private var debounceJob: Job? = null
@@ -123,8 +122,8 @@ class HomeFragment : Fragment() {
                             viewModel.getPhoto(newText.toString())
                         }
                 }
-                    return true
-                }
+                return true
+            }
         })
 
 
